@@ -63,3 +63,18 @@ nav button.on{color:var(--ac);font-weight:700}nav button.on span{filter:none;opa
 #toast{position:fixed;left:50%;top:70px;transform:translate(-50%,-30px) scale(.8);background:var(--grad);padding:14px 24px;border-radius:30px;font-weight:700;opacity:0;pointer-events:none;transition:.35s cubic-bezier(.3,1.6,.5,1);z-index:9}
 #toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ===== Rang, stats, checklist, conseils ===== */
+.rank{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:14px}
+.stats{display:flex;gap:8px;margin-top:10px;text-align:center}
+.stats div{flex:1;background:#101013;border-radius:14px;padding:10px 4px}
+.stats b{display:block;font-family:Impact,sans-serif;font-weight:400;font-size:28px;color:var(--ac)}
+.stats small{font-size:12px}
+.chk{list-style:none;margin:0;padding:0}
+.chk li{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.chk li i{width:28px;height:28px;border-radius:50%;border:2px solid #3a3a42;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;flex:none}
+.chk li.on{color:var(--mu);text-decoration:line-through}
+.chk li.on i{background:var(--grad);border-color:transparent;color:#fff}
+.card p{margin:6px 0 0}
+.combo{font-size:22px;font-weight:700;color:var(--ac);margin:4px 0}
+/* ===== Souplesse ===== */
+.card li em{font-style:normal;font-size:26px;width:40px;text-align:center;flex:none}
