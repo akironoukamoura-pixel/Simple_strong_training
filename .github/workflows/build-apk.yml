@@ -20,7 +20,7 @@ jobs:
       - name: Préparer le projet
         run: |
           mkdir www assets
-          cp index.html style.css app.js www/
+          cp index.html style.css exos.js app.js www/
           cp icon-only.png icon-foreground.png icon-background.png assets/
           npm init -y
           npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
