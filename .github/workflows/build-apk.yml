@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -27,8 +29,13 @@ jobs:
           npx @capacitor/assets generate --android
           npx cap sync android
       - name: Compiler l'APK
-        run: cd android && ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
+        run: |
+          cd android && ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../Muscu.apk
+      - name: Publier l'APK dans les Releases
+        uses: softprops/action-gh-release@v2
         with:
-          name: muscu-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          tag_name: latest
+          name: Muscu (dernière version)
+          files: Muscu.apk
+          make_latest: true
