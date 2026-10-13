@@ -78,3 +78,20 @@ nav button.on{color:var(--ac);font-weight:700}nav button.on span{filter:none;opa
 .combo{font-size:22px;font-weight:700;color:var(--ac);margin:4px 0}
 /* ===== Souplesse ===== */
 .card li em{font-style:normal;font-size:26px;width:40px;text-align:center;flex:none}
+/* ===== Chrono d'exercice + décors des illustrations ===== */
+.timer.sm{font-size:84px;text-align:center;margin:4px 0}
+.stop{background:#c62828;box-shadow:none}
+.fig svg .o,.card li svg .o{stroke-opacity:.4}
+.fig svg .g,.card li svg .g{stroke-opacity:.25;stroke-width:2}
+/* ===== Exercices, détails, souplesse ===== */
+nav button{font-size:11px;padding:8px 0}
+.card li b small{display:block;font-weight:400}
+.card .bl li{display:list-item;border:0;padding:0;margin:7px 0}
+.card ul.bl{list-style:disc}.card ol.bl{list-style:decimal}
+.bl{margin:8px 0 0;padding-left:22px}
+.card.tank .bl li::marker{color:var(--ac)}
+.fl li{flex-wrap:wrap}
+.xd{flex:0 0 100%;color:var(--mu);font-size:15px;padding:4px 0 6px}
+.xd p{margin:0 0 4px}.xd .xh{color:var(--tx);font-weight:700;margin-top:10px}
+.more{text-align:left;color:var(--mu);font-size:15px;margin:6px 0}
+.more summary{cursor:pointer;color:var(--ac);font-weight:700;text-align:center}

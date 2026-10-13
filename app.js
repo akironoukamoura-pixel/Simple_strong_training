@@ -11,24 +11,25 @@ const $ = s => document.querySelector(s);
 const x = (id,n,s,r,rest,t,p,tip,rec) => ({id,n,s,r,rest,t,p,tip,rec});
 const E = {
   pompes: x('pompes','Pompes',4,12,60,'r','push','Corps gainé, poitrine au sol, poussée franche.','pompes'),
-  pexp:   x('pexp','Pompes explosives',3,6,75,'r','push','Pousse fort : les mains décollent du sol.'),
-  dips:   x('dips','Dips sur chaise',3,10,60,'r','push','Descends à 90°, remonte fort.','dips'),
+  pexp:   x('pexp','Pompes explosives',3,6,75,'r','pexp','Pousse fort : les mains décollent du sol.'),
+  dips:   x('dips','Dips sur chaise',3,10,60,'r','dips','Descends à 90°, remonte fort.','dips'),
   tract:  x('tract','Tractions',4,5,90,'r','pull','Menton au-dessus de la barre, descente contrôlée.','tractions'),
-  neg:    x('neg','Négatives de tractions',3,3,60,'r','pull','Saute en haut, puis descends en 5 secondes : le meilleur moyen de gagner des tractions.'),
-  rows:   x('rows','Rows inversés',4,10,60,'r','pull','Sous une table solide, tire la poitrine vers elle.'),
-  super:  x('super','Supermans',3,15,45,'r','core','Ventre au sol, lève bras et jambes, serre le dos.'),
+  neg:    x('neg','Négatives de tractions',3,3,60,'r','neg','Saute en haut, puis descends en 5 secondes : le meilleur moyen de gagner des tractions.'),
+  rows:   x('rows','Rows inversés',4,10,60,'r','rows','Sous une table solide, tire la poitrine vers elle.'),
+  super:  x('super','Supermans',3,15,45,'r','super','Ventre au sol, lève bras et jambes, serre le dos.'),
   squat:  x('squat','Squats sautés',4,12,60,'r','jump','Descends bas, saute le plus haut possible.','squat'),
-  fentes: x('fentes','Fentes',3,12,60,'r','squat','Genou arrière près du sol, buste droit.'),
-  banc:   x('banc','Montées sur banc',3,10,60,'r','squat','Monte avec une jambe, pousse dans le talon.'),
-  burpee: x('burpee','Burpees',3,10,60,'r','jump','Pompe, saut, enchaîne sans pause.'),
-  jambes: x('jambes','Relevés de jambes',3,15,45,'r','core','Lombaires plaquées au sol, jambes tendues.'),
-  crunch: x('crunch','Crunchs',3,20,30,'r','core','Enroule le haut du dos, souffle en montant.'),
-  bike:   x('bike','Crunchs vélo',3,30,30,'r','core','Coude vers genou opposé, sans à-coup.'),
-  mont:   x('mont','Mountain climbers',3,30,45,'r','plank','Genoux vers la poitrine, rythme rapide.'),
+  fentes: x('fentes','Fentes',3,12,60,'r','lunge','Genou arrière près du sol, buste droit.'),
+  banc:   x('banc','Montées sur banc',3,10,60,'r','step','Monte avec une jambe, pousse dans le talon.'),
+  burpee: x('burpee','Burpees',3,10,60,'r','burpee','Pompe, saut, enchaîne sans pause.'),
+  jambes: x('jambes','Relevés de jambes',3,15,45,'r','legs','Lombaires plaquées au sol, jambes tendues.'),
+  crunch: x('crunch','Crunchs',3,20,30,'r','crunch','Enroule le haut du dos, souffle en montant.'),
+  bike:   x('bike','Crunchs vélo',3,30,30,'r','bike','Coude vers genou opposé, sans à-coup.'),
+  mont:   x('mont','Mountain climbers',3,30,45,'t','mont','Genoux vers la poitrine, rythme rapide.'),
   gaine:  x('gaine','Gainage (planche)',3,30,45,'t','plank','Corps aligné, ventre serré, respire.','gainage'),
   gaine2: x('gaine2','Gainage (planche)',3,45,45,'t','plank','Corps aligné, ventre serré, respire.','gainage')
 };
-const ORDER = ['A','B','C','D','E'];
+EEX.forEach(o => E[o.id] = x(o.id,o.n,o.s,o.r,o.rest,o.t||'r',o.p,o.tip));   // exercices élastiques (exos.js)
+const ORDER = ['A','B','C','D','E','F'];
 const DAYS = {
   A: { n:'Pousser',          e:[E.pompes,E.pexp,E.dips,E.jambes,E.gaine] },
   B: { n:'Tirer',            e:[E.tract,E.rows,E.super,E.jambes,E.bike] },
@@ -37,6 +38,7 @@ const DAYS = {
   E: { n:'Abdos et gainage', e:[E.crunch,E.jambes,E.gaine2,E.bike,E.mont] }
 };
 Object.values(DAYS).forEach(d => d.e.splice(1, 0, E.neg));   // + négatives de tractions à chaque séance
+DAYS.F = { n:'Élastiques', e:[E.epress,E.erow,E.efac,E.ecurl,E.etri,E.esquat,E.epal] };
 const tgt = e => S.tgt[e.id] || e.r;           // objectif actuel (progression auto)
 const unit = e => e.t === 't' ? ' s' : '';
 
@@ -76,16 +78,27 @@ const QUOTES = ['La discipline bat la motivation.','Un pas de plus. Une rep de p
 const quote = () => QUOTES[Math.floor(new Date() / 864e5) % QUOTES.length];
 const buzz = () => { try { navigator.vibrate && navigator.vibrate(200); const c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator(); o.frequency.value = 880; o.connect(c.destination); o.start(); o.stop(c.currentTime + .25); } catch (e) {} };
 
-// Illustrations SVG minimalistes (bonhomme filaire) : [tête x, tête y, tracé]
+// Illustrations SVG minimalistes : [x tête, y tête, tracé du corps, décor (barre, banc, chaise...)]
 const POSES = {
-  push:  [84,25,'M12 46L76 30M76 30L78 48M12 46L6 50'],
-  pull:  [50,18,'M15 5H85M42 5L48 26M58 5L52 26M50 26V46M50 46L44 58M50 46L56 58'],
-  squat: [48,12,'M48 18L44 34L62 38L58 56M48 22L68 26'],
-  plank: [86,28,'M20 42L80 32M80 32V46M20 42L12 48'],
-  core:  [10,44,'M16 48H58L74 28M58 48L80 40'],
-  jump:  [50,10,'M50 16V36L38 56M50 36L62 56M50 20L34 6M50 20L66 6']
+  push:  [84,30,'M12 52L76 34M76 34V55',''],
+  pexp:  [82,22,'M12 46L74 28M74 28L90 32','M58 14V4M55 8L58 4L61 8'],
+  dips:  [50,14,'M50 20V40H70L74 56M50 22L38 36','M26 38H42M30 38V58'],
+  pull:  [50,9,'M30 12L44 28M70 12L56 28M50 28V46L46 60M50 46L54 60','M16 12H84'],
+  neg:   [50,20,'M28 5L44 30M72 5L56 30M50 30V48L46 60M50 48L54 60','M16 5H84M88 20V42M84 38L88 42L92 38'],
+  rows:  [18,40,'M26 42L86 52M32 43L40 30','M24 30H54M30 30V58'],
+  super: [16,40,'M24 46H72M24 46L6 36M72 46L92 38',''],
+  legs:  [10,50,'M16 52H50M50 52V16M16 52L30 56',''],
+  crunch:[32,28,'M50 54L36 34M50 54L66 38L80 54M38 36L52 32',''],
+  bike:  [28,30,'M44 54L32 36M44 54L58 38L66 46M44 54H88M34 38L48 36',''],
+  jump:  [50,10,'M50 16V34M50 20L36 8M50 20L64 8M50 34L40 44L44 50M50 34L60 44L56 50',''],
+  lunge: [46,10,'M46 16V34M46 34L66 38V56M46 34L30 50L18 56',''],
+  step:  [50,8,'M50 14V32M50 32L66 36L68 40M50 32L44 58','M60 40H94V58'],
+  burpee:[64,22,'M30 34L58 26M30 34L36 50L24 56M58 26L66 56',''],
+  mont:  [86,26,'M22 46L80 30M80 30V54M22 46L10 56M22 46L50 48L46 56',''],
+  plank: [86,30,'M16 50L82 36M82 36V52L92 52','']
 };
-const svg = p => { const [a,b,d] = POSES[p]; return `<svg viewBox="0 0 100 62"><circle cx="${a}" cy="${b}" r="6"/><path d="${d}"/></svg>`; };
+Object.assign(POSES, EPOSES);
+const svg = p => { const [a, b, d, o] = POSES[p]; return `<svg viewBox="0 0 100 62"><path class="g" d="M4 58H96"/>${o ? `<path class="o" d="${o}"/>` : ''}<circle cx="${a}" cy="${b}" r="6"/><path d="${d}"/></svg>`; };
 
 /* ================= NAVIGATION ================= */
 let lastView = '', view = 'home', W = null, B = null, tm = null, hm = 0;
@@ -99,9 +112,9 @@ function count(sec, end) {                      // compte à rebours
   }, 1000);
 }
 function draw() {
-  $('#nav').style.display = ['home','hist','troph','tips','flex'].includes(view) ? 'flex' : 'none';
+  $('#nav').style.display = ['home','exos','hist','troph','tips','flex'].includes(view) ? 'flex' : 'none';
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === view));
-  $('#app').innerHTML = ({ home, hist, troph, work, rest, bonus, fin, tank, tips, flex, frun })[view]();
+  $('#app').innerHTML = ({ home, exos, exo, hist, troph, work, rest, bonus, fin, tank, tips, flex, frun })[view]();
   if (view !== lastView) $('#app').scrollTop = 0; lastView = view;
   if (view === 'rest') count(W.r, () => go('work'));
   if (view === 'frun') count(STR[F.i][2], nextStr);
@@ -110,8 +123,8 @@ document.querySelectorAll('#nav button').forEach(b => b.onclick = () => go(b.dat
 
 /* ================= ÉCRANS ================= */
 function home() {
-  const k = ORDER[S.seq % 5], D = DAYS[k], fait = !!S.done[ds(new Date())], T = S.tank;
-  return `<header><div><small>Niveau ${Math.floor(S.seq/5)+1}</small><h1>Muscu</h1></div>
+  const k = ORDER[S.seq % ORDER.length], D = DAYS[k], fait = !!S.done[ds(new Date())], T = S.tank;
+  return `<header><div><small>Niveau ${Math.floor(S.seq/ORDER.length)+1}</small><h1>Muscu</h1></div>
     <div class="st">🔥 <b>${streak()}</b><small>jours de suite</small></div></header>
     ${rankHTML()}<p class="quote">${quote()}</p>
     <section class="card"><small>${fait ? 'Prochaine séance' : 'Séance du jour'} (jour ${k})</small><h2>${D.n}</h2>
@@ -122,24 +135,40 @@ function home() {
     <button class="ghost" onclick="go('tank')">Choisir et lancer</button>
     <div class="row"><span>Le proposer après la séance</span><button class="sw ${T.on ? 'on' : ''}" onclick="S.tank.on=!S.tank.on;save();draw()"></button></div></section>${chkHTML()}`;
 }
-function start() { W = { k:ORDER[S.seq % 5], i:0, s:0, v:null, miss:false, up:[], r:0 }; go('work'); }
+function start() { W = { k:ORDER[S.seq % ORDER.length], i:0, s:0, v:null, miss:false, up:[], r:0 }; if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
+  go('work'); }
 const cur = () => DAYS[W.k].e[W.i];
 
 function work() {
-  const D = DAYS[W.k], e = cur(), g = tgt(e); if (W.v == null) W.v = g;
+  const D = DAYS[W.k], e = cur(), g = tgt(e), timed = e.t === 't';
+  if (W.v == null) W.v = g;
+  const ctrl = timed && W.run
+    ? `<button class="big stop" onclick="swStop()">■ Stop</button>`
+    : `${timed ? '<button class="ghost" onclick="swStart()">▶ Lancer le chrono (3 s pour te placer)</button>' : ''}
+       <div class="step"><button onclick="adj(-1)">−</button><b>${W.v}</b><button onclick="adj(1)">+</button></div>
+       <button class="big" onclick="setDone()">Série faite</button>`;
   return `<div class="topbar"><small>${D.n} · exercice ${W.i+1}/${D.e.length}</small><button class="x" onclick="if(confirm('Quitter la séance ?'))go('home')">✕</button></div>
     <div class="bar"><i style="width:${W.i / D.e.length * 100}%"></i></div>
     <div class="fig">${svg(e.p)}</div><h2>${e.n}</h2><p class="tip">${e.tip}</p>
-    <p class="set">Série ${W.s+1}/${e.s} · objectif ${g}${unit(e)}</p><div class="dots">${Array.from({length:e.s},(_,i)=>`<i class="${i<W.s?'on':i===W.s?'cur':''}"></i>`).join('')}</div>
-    <div class="step"><button onclick="adj(-1)">−</button><b>${W.v}</b><button onclick="adj(1)">+</button></div>
-    <button class="big" onclick="setDone()">Série faite</button>`;
+    <p class="set">Série ${W.s+1}/${e.s} · objectif ${g}${unit(e)}</p>
+    <div class="dots">${Array.from({length:e.s},(_,i)=>`<i class="${i<W.s?'on':i===W.s?'cur':''}"></i>`).join('')}</div>
+    ${timed ? `<div class="timer sm" id="sw">${W.run ? (W.pre || W.el) : (W.el || 0)}</div>` : ''}${ctrl}`;
 }
+// Chronomètre : 3 s de préparation, puis il compte jusqu'à ton Stop (bip à l'objectif)
+function swStart() { stop(); W.run = true; W.el = 0; W.pre = 3; draw(); tm = setInterval(swTick, 1000); }
+function swTick() {
+  const el = $('#sw');
+  if (W.pre > 0) { W.pre--; if (el) el.textContent = W.pre || 'GO'; if (!W.pre) buzz(); return; }
+  W.el++; if (el) el.textContent = W.el;
+  if (W.el === tgt(cur())) { buzz(); toast('✅ Objectif atteint, tiens encore !'); }
+}
+function swStop() { stop(); W.run = false; W.v = W.el > 0 ? W.el : tgt(cur()); draw(); }
 function adj(d) { W.v = Math.max(0, W.v + d * (cur().t === 't' ? 5 : 1)); draw(); }
 function setDone() {
   const e = cur(), g = tgt(e);
   if (e.rec && W.v > (S.rec[e.rec] || 0)) S.rec[e.rec] = W.v;   // record d'une série
   if (W.v < g) W.miss = true;
-  W.v = null;
+  W.v = null; W.run = false; W.el = 0;
   if (++W.s >= e.s) {                                            // exercice terminé
     if (!W.miss) { S.tgt[e.id] = g + (e.t === 't' ? 5 : 1); W.up.push(`${e.n} → ${S.tgt[e.id]}${unit(e)}`); }
     W.miss = false; W.s = 0; W.i++;
@@ -212,16 +241,19 @@ function flex() {
   return `<header><h1>Souplesse</h1></header>
     <p class="tip">Une routine express chaque jour, idéale après la séance ou avant de dormir. Plus de souplesse, c'est des coups plus rapides, des tractions plus propres et moins de blessures.</p>
     <section class="card"><div class="row" style="margin:0"><small>${Math.round(tot / 60)} min · ${STR.length} étirements</small><b style="color:var(--ac)">${fait ? '✓ fait aujourd\'hui' : ''}</b></div>
-    <ul>${STR.map(x => `<li><em>${x[0]}</em><b>${x[1]}</b><span>${x[2]} s</span></li>`).join('')}</ul></section>
+    <ul class="fl">${STR.map((x, i) => `<li onclick="fx=fx===${i}?-1:${i};draw()"><em>${x[0]}</em><b>${x[1]}</b><span>${x[2]} s</span>${fx === i ? fxHTML(i) : ''}</li>`).join('')}</ul></section>
     <button class="big" onclick="startFlex()">${fait ? 'Refaire la routine' : 'Lancer la routine'}</button>
-    <p class="tip" style="text-align:center">${S.flexN} routine(s) terminée(s)</p>`;
+    <p class="tip" style="text-align:center">${S.flexN} routine(s) terminée(s)</p>
+    <section class="card"><h3 style="margin-top:0">🧘 Bien s'étirer</h3>${lst(STIP)}</section>`;
 }
+const fxHTML = i => { const d = STRX[i]; return `<div class="xd"><p>${STR[i][3]}</p><p>${d.why}</p><p class="xh">Comment faire</p>${lst(d.how, 'ol')}<p class="xh">Pour aller plus loin</p>${lst(d.up)}</div>`; };
 function startFlex() { F = { i:0 }; go('frun'); }
 function frun() {
   const x = STR[F.i];
   return `<div class="topbar"><small>Étirement ${F.i + 1}/${STR.length}</small><button class="x" onclick="go('flex')">✕</button></div>
     <div class="bar"><i style="width:${F.i / STR.length * 100}%"></i></div>
     <div class="center"><div style="font-size:80px">${x[0]}</div><h2>${x[1]}</h2><p class="tip">${x[3]}</p>
+    <details class="more"><summary>Comment faire / aller plus loin</summary><p>${STRX[F.i].why}</p>${lst(STRX[F.i].how, 'ol')}<p><b style="color:var(--tx)">Aller plus loin :</b></p>${lst(STRX[F.i].up)}</details>
     <div class="timer" id="t">${x[2]}</div><p class="tip">Respire lentement, sans forcer.</p>
     <button class="big" onclick="stop();nextStr()">Suivant</button></div>`;
 }
@@ -230,6 +262,28 @@ function endFlex() {
   const k = ds(new Date()), a = S.chk[k] || [];
   S.flex[k] = 1; S.flexN++; if (!a.includes(3)) S.chk[k] = [...a, 3];   // coche « Étirements » dans la checklist
   save(); check(); toast('🧘 Routine terminée'); go('flex');
+}
+
+/* ===== Exercices : bibliothèque + fiches ===== */
+let XF = 'all', XI = null, fx = -1;
+const GR = { all:'Tous', push:'Pousser', pull:'Tirer', legs:'Jambes', core:'Abdos', el:'🎗️ Élastiques' };
+const lst = (s, t = 'ul') => `<${t} class="bl">${s.split('|').map(i => `<li>${i}</li>`).join('')}</${t}>`;
+function exos() {
+  const ks = Object.keys(INFO).filter(k => k !== 'gaine2' && (XF === 'all' || (XF === 'el' ? INFO[k].el : INFO[k].g === XF)));
+  return `<header><h1>Exercices</h1><small>${ks.length}</small></header>
+    <p class="tip">Touche un exercice : explication, conseils et façons de le rendre plus difficile.</p>
+    <div class="chips" style="margin-bottom:12px">${Object.keys(GR).map(k => `<button class="chip ${XF === k ? 'on' : ''}" onclick="XF='${k}';draw()">${GR[k]}</button>`).join('')}</div>
+    <section class="card"><ul>${ks.map(k => { const e = E[k]; return `<li onclick="XI='${k}';go('exo')">${svg(e.p)}<b>${e.n}<small>${INFO[k].m}</small></b><span>›</span></li>`; }).join('')}</ul></section>`;
+}
+function exo() {
+  const e = E[XI], I = INFO[XI];
+  return `<div class="topbar"><button class="x" onclick="go('exos')">‹</button><small>${I.mat}</small><span style="width:40px"></span></div>
+    <div class="fig">${svg(e.p)}</div><h2>${e.n}</h2><p class="tip">💪 ${I.m}</p>
+    <section class="card"><h3 style="margin-top:0">Comment faire</h3>${lst(I.how, 'ol')}</section>
+    <section class="card"><h3 style="margin-top:0">💡 Conseils</h3>${lst(I.tips)}</section>
+    <section class="card tank"><h3 style="margin-top:0">🔥 Pour augmenter la difficulté</h3>${lst(I.up)}</section>
+    <section class="card"><h3 style="margin-top:0">🌱 Trop dur ?</h3><p>${I.down}</p></section>
+    <p class="tip" style="text-align:center">Objectif actuel : ${e.s} × ${tgt(e)}${unit(e)}</p>`;
 }
 
 /* ===== Rang, checklist, conseils ===== */
