@@ -3,6 +3,7 @@
 const KEY = 'muscu_v1';
 let S = { flex:{}, flexN:0, chk:{}, tank:{m:'bike',s:10,r:6,on:true}, done:{}, rec:{}, tgt:{}, bonus:0, badges:{}, seq:0, maxStreak:0 };
 try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+S.tank.p = S.tank.p ?? 20;   // repos entre les rounds du bonus (s)
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 const $ = s => document.querySelector(s);
 
@@ -115,7 +116,7 @@ function count(sec, end) {                      // compte à rebours
 function draw() {
   $('#nav').style.display = ['home','exos','hist','troph','tips','flex'].includes(view) ? 'flex' : 'none';
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === view));
-  $('#app').innerHTML = ({ home, eq, exos, exo, hist, troph, work, rest, bonus, fin, tank, tips, flex, frun })[view]();
+  $('#app').innerHTML = ({ home, bfin, eq, exos, exo, hist, troph, work, rest, bonus, fin, tank, tips, flex, frun })[view]();
   if (view !== lastView) $('#app').scrollTop = 0; lastView = view;
   if (view === 'rest') count(W.r, () => go('work'));
   if (view === 'frun' && !F.p) ftick();
@@ -132,7 +133,7 @@ function home() {
     <ul>${D.e.map(e => `<li>${svg(e.p)}<b>${e.n}</b><span>${e.s} × ${tgt(e)}${unit(e)}</span></li>`).join('')}</ul></section>
     <button class="big" onclick="start()">${fait ? 'Refaire une séance' : 'Commencer la séance'}</button>
     <section class="card tank" style="margin-top:16px"><small>Bonus facultatif</small><h3>⚡ Brûler le réservoir</h3>
-    <p>${TANKS[T.m][0]} · ${T.s} s × ${T.r} rounds</p>
+    <p>${TANKS[T.m][0]} · ${T.s} s × ${T.r} rounds${T.p ? ' · repos ' + T.p + ' s' : ''}</p>
     <button class="ghost" onclick="go('tank')">Choisir et lancer</button>
     <div class="row"><span>Le proposer après la séance</span><button class="sw ${T.on ? 'on' : ''}" onclick="S.tank.on=!S.tank.on;save();draw()"></button></div></section>${gripCard()}${chkHTML()}`;
 }
@@ -236,19 +237,39 @@ function tank() {
     <h3>Activité</h3><div class="chips">${Object.keys(TANKS).map(k => chip('m', k, TANKS[k][0])).join('')}</div>
     <h3>Durée d'un round</h3><div class="chips">${[10,20,30].map(n => chip('s', n, n + ' s')).join('')}</div>
     <h3>Nombre de rounds</h3><div class="chips">${[4,6,8].map(n => chip('r', n, n)).join('')}</div>
+    <h3>Repos entre les rounds</h3><div class="chips">${[0,10,20,30,45].map(n => chip('p', n, n ? n + ' s' : 'Aucun')).join('')}</div>
     <button class="big" onclick="startBonus()">⚡ Lancer</button>
     <button class="ghost" onclick="go('home')">Retour</button>`;
 }
 function startBonus() { B = { r:0, run:false }; go('bonus'); }
 function bonus() {
   const T = S.tank, m = TANKS[T.m];
+  if (B.rest) return `<div class="center"><small>Repos · prochain round ${B.r + 1}/${T.r}</small><h2>😮‍💨 Récupère</h2><p class="tip">Respire profondément, secoue les bras. Le prochain round démarre tout seul.</p>
+    <div class="timer" id="t">${T.p}</div><p>${B.r} round(s) fait(s)</p>
+    <button class="big" onclick="skipRest()">Round suivant maintenant</button>
+    <button class="ghost" onclick="endBonus()">${B.r >= 4 ? 'Terminer' : 'Passer'}</button></div>`;
   return `<div class="center"><small>Brûler le réservoir</small><h2>${m[0]}</h2><p class="tip">${m[1]}</p>${T.m === 'boxe' ? `<p class="combo">🥊 ${COMBOS[B.r % COMBOS.length]}</p>` : ''}
     <div class="timer" id="t">${B.run ? T.s : B.r + '/' + T.r}</div><p>${B.r} round(s) fait(s)</p>
     ${B.run ? '' : `<button class="big" onclick="go10()">${B.r ? 'Round suivant' : 'GO !'}</button>`}
     <button class="ghost" onclick="endBonus()">${B.r >= 4 ? 'Terminer' : 'Passer'}</button></div>`;
 }
-function go10() { B.run = true; draw(); count(S.tank.s, () => { B.r++; B.run = false; B.r >= S.tank.r ? endBonus() : draw(); }); }
-function endBonus() { if (B.r >= 4) { S.bonus++; save(); check(); } go('home'); }
+function go10() { B.run = true; B.rest = false; draw(); count(S.tank.s, () => { B.r++; B.run = false; if (B.r >= S.tank.r) return endBonus(); S.tank.p ? startRest() : draw(); }); }
+function startRest() { B.rest = true; draw(); count(S.tank.p, go10); }   // repos auto, puis round suivant
+function skipRest() { stop(); go10(); }
+const BRAVO = ['Tu as tout donné, champion !','Voilà comment on forge un mental d\'acier.','Le réservoir est à sec, la fierté est pleine.','Ça, c\'est un vrai round de boxeur.'];
+function endBonus() {
+  stop();
+  if (B.r < 4) return go('home');
+  const k = ds(new Date()), c = S.chk[k] || [];
+  S.bonus++; if (!c.includes(6)) S.chk[k] = [...c, 6];   // coche « Bonus » dans la checklist
+  save(); check(); B.bravo = BRAVO[Math.floor(Math.random() * BRAVO.length)]; go('bfin');
+}
+function bfin() {
+  const full = B.r >= S.tank.r;
+  return `<div class="center"><div style="font-size:90px">🏆</div><h2>${full ? 'Réservoir vidé !' : 'Beau boulot !'}</h2>
+    <p class="tip">${B.r} round(s) de ${TANKS[S.tank.m][0]}.</p><p class="combo">🥊 ${B.bravo}</p>
+    <p>✅ Bonus coché dans ta journée de boxeur</p><button class="big" onclick="go('home')">Retour</button></div>`;
+}
 
 /* ===== Souplesse : routine express (modifie la liste ici) ===== */
 // [icône, nom, secondes, consigne]
@@ -339,7 +360,7 @@ function rankHTML() {
     <div><b>${S.rec.pompes || 0}</b><small>pompes (record)</small></div><div><b>${S.seq}</b><small>séances</small></div></div></section>`;
 }
 const COMBOS = ['Jab – Direct','Jab – Direct – Crochet','Jab – Jab – Direct – Esquive','Direct – Crochet – Direct','Jab – Direct – Uppercut – Crochet','Jab – Crochet – Esquive – Direct'];
-const CHK = ['Échauffement 5 min','Boire 2 L d\'eau','Protéines à chaque repas','Étirements / mobilité','Dormir 7-8 h','Poigne d\'acier'];
+const CHK = ['Échauffement 5 min','Boire 2 L d\'eau','Protéines à chaque repas','Étirements / mobilité','Dormir 7-8 h','Poigne d\'acier','Bonus : vider le réservoir'];
 function chkHTML() {
   const a = S.chk[ds(new Date())] || [];
   return `<section class="card" style="margin-top:16px"><div class="row" style="margin:0 0 6px"><h3 style="margin:0">✅ Ma journée de boxeur</h3><b style="color:var(--ac)">${a.length}/${CHK.length}</b></div>
