@@ -51,6 +51,7 @@ const BG = [];
             d: k==='gainage' ? 'tenu sans pause' : "d'affilée", ok:() => (S.rec[k]||0) >= v })));
 [3,7,30,100].forEach(v => BG.push({ id:'s'+v, i:'🔥', t:`${v} jours`, d:'de série', ok:() => S.maxStreak >= v }));
 [7,30].forEach(v => BG.push({ id:'f'+v, i:'🧘', t:'Souplesse', d:v+' routines', ok:() => S.flexN >= v }));
+[7,30].forEach(v => BG.push({ id:'g'+v, i:'🤜', t:'Poigne d\'acier', d:v+' séances', ok:() => (S.gripN || 0) >= v }));
 BG.push({ id:'expl', i:'⚡', t:'Explosif', d:'10 bonus faits', ok:() => S.bonus >= 10 });
 
 function check() {                              // débloque les nouveaux badges
@@ -117,7 +118,7 @@ function draw() {
   $('#app').innerHTML = ({ home, exos, exo, hist, troph, work, rest, bonus, fin, tank, tips, flex, frun })[view]();
   if (view !== lastView) $('#app').scrollTop = 0; lastView = view;
   if (view === 'rest') count(W.r, () => go('work'));
-  if (view === 'frun') count(STR[F.i][2], nextStr);
+  if (view === 'frun' && !F.p) ftick();
 }
 document.querySelectorAll('#nav button').forEach(b => b.onclick = () => go(b.dataset.v));
 
@@ -133,7 +134,7 @@ function home() {
     <section class="card tank" style="margin-top:16px"><small>Bonus facultatif</small><h3>⚡ Brûler le réservoir</h3>
     <p>${TANKS[T.m][0]} · ${T.s} s × ${T.r} rounds</p>
     <button class="ghost" onclick="go('tank')">Choisir et lancer</button>
-    <div class="row"><span>Le proposer après la séance</span><button class="sw ${T.on ? 'on' : ''}" onclick="S.tank.on=!S.tank.on;save();draw()"></button></div></section>${chkHTML()}`;
+    <div class="row"><span>Le proposer après la séance</span><button class="sw ${T.on ? 'on' : ''}" onclick="S.tank.on=!S.tank.on;save();draw()"></button></div></section>${gripCard()}${chkHTML()}`;
 }
 function start() { W = { k:ORDER[S.seq % ORDER.length], i:0, s:0, v:null, miss:false, up:[], r:0 }; if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
   go('work'); }
@@ -227,37 +228,52 @@ function endBonus() { if (B.r >= 4) { S.bonus++; save(); check(); } go('home'); 
 // [icône, nom, secondes, consigne]
 const STR = [
   ['🤷','Cercles d\'épaules',20,'Grands cercles lents, vers l\'arrière.'],
-  ['🚪','Pectoraux (contre un mur)',30,'Avant-bras au mur, tourne doucement le buste.'],
+  ['🚪','Pectoraux (contre un mur)',30,'Avant-bras au mur, tourne doucement le buste.',2],
   ['🧗','Suspension à la barre',30,'Relâche les épaules et laisse le dos s\'étirer.'],
-  ['🏃','Fente basse (hanches)',30,'Genou arrière au sol, pousse les hanches vers l\'avant.'],
-  ['🦵','Arrière des cuisses',30,'Jambe tendue devant, dos plat, penche-toi.'],
-  ['🦶','Avant des cuisses',30,'Talon vers la fesse, genoux joints.'],
+  ['🏃','Fente basse (hanches)',30,'Genou arrière au sol, pousse les hanches vers l\'avant.',2],
+  ['🦵','Arrière des cuisses',30,'Jambe tendue devant, dos plat, penche-toi.',2],
+  ['🦶','Avant des cuisses',30,'Talon vers la fesse, genoux joints.',2],
   ['🐱','Chat-vache',30,'Dos rond puis creux, au rythme du souffle.'],
   ['🧘','Posture de l\'enfant',30,'Fesses sur les talons, bras loin devant, respire.']
 ];
 let F = null;
 function flex() {
-  const fait = !!S.flex[ds(new Date())], tot = STR.reduce((a, x) => a + x[2], 0);
+  const fait = !!S.flex[ds(new Date())], tot = STR.reduce((a, x) => a + x[2] * (x[4] ? 2 : 1), 0);
   return `<header><h1>Souplesse</h1></header>
     <p class="tip">Une routine express chaque jour, idéale après la séance ou avant de dormir. Plus de souplesse, c'est des coups plus rapides, des tractions plus propres et moins de blessures.</p>
-    <section class="card"><div class="row" style="margin:0"><small>${Math.round(tot / 60)} min · ${STR.length} étirements</small><b style="color:var(--ac)">${fait ? '✓ fait aujourd\'hui' : ''}</b></div>
-    <ul class="fl">${STR.map((x, i) => `<li onclick="fx=fx===${i}?-1:${i};draw()"><em>${x[0]}</em><b>${x[1]}</b><span>${x[2]} s</span>${fx === i ? fxHTML(i) : ''}</li>`).join('')}</ul></section>
+    <section class="card"><div class="row" style="margin:0"><small>${Math.round(tot / 60)} min · ${STR.length} étirements · les deux côtés</small><b style="color:var(--ac)">${fait ? '✓ fait aujourd\'hui' : ''}</b></div>
+    <ul class="fl">${STR.map((x, i) => `<li onclick="fx=fx===${i}?-1:${i};draw()"><em>${x[0]}</em><b>${x[1]}</b><span>${x[4] ? '2×' : ''}${x[2]} s</span>${fx === i ? fxHTML(i) : ''}</li>`).join('')}</ul></section>
     <button class="big" onclick="startFlex()">${fait ? 'Refaire la routine' : 'Lancer la routine'}</button>
     <p class="tip" style="text-align:center">${S.flexN} routine(s) terminée(s)</p>
     <section class="card"><h3 style="margin-top:0">🧘 Bien s'étirer</h3>${lst(STIP)}</section>`;
 }
 const fxHTML = i => { const d = STRX[i]; return `<div class="xd"><p>${STR[i][3]}</p><p>${d.why}</p><p class="xh">Comment faire</p>${lst(d.how, 'ol')}<p class="xh">Pour aller plus loin</p>${lst(d.up)}</div>`; };
-function startFlex() { F = { i:0 }; go('frun'); }
+const mkSteps = L => L.flatMap((x, i) => x[4] ? [{ i, side:'G', sec:x[2] }, { i, swap:1, sec:5 }, { i, side:'D', sec:x[2] }] : [{ i, sec:x[2] }]);
+function runStart(o) { F = { ...o, steps:mkSteps(o.list), k:0, p:false }; F.t = F.steps[0].sec; go('frun'); }
+const startFlex = () => runStart({ list:STR, x:STRX, kind:'flex', title:'Étirement', back:'flex', tip:'Respire lentement, sans forcer.' });
+const startGrip = () => runStart({ list:GRIP, x:GRX, kind:'grip', title:'Poigne', back:'home', tip:'Serre fort, respire, garde les épaules basses.' });
+const ctl = () => `<button class="big" id="pb" onclick="fpause()">${F.p ? '▶ Reprendre' : '⏸ Pause'}</button><button class="ghost" onclick="stop();nextStr()">Suivant</button>`;
 function frun() {
-  const x = STR[F.i];
-  return `<div class="topbar"><small>Étirement ${F.i + 1}/${STR.length}</small><button class="x" onclick="go('flex')">✕</button></div>
-    <div class="bar"><i style="width:${F.i / STR.length * 100}%"></i></div>
-    <div class="center"><div style="font-size:80px">${x[0]}</div><h2>${x[1]}</h2><p class="tip">${x[3]}</p>
-    <details class="more"><summary>Comment faire / aller plus loin</summary><p>${STRX[F.i].why}</p>${lst(STRX[F.i].how, 'ol')}<p><b style="color:var(--tx)">Aller plus loin :</b></p>${lst(STRX[F.i].up)}</details>
-    <div class="timer" id="t">${x[2]}</div><p class="tip">Respire lentement, sans forcer.</p>
-    <button class="big" onclick="stop();nextStr()">Suivant</button></div>`;
+  const s = F.steps[F.k], x = F.list[s.i], d = F.x[s.i];
+  const top = `<div class="topbar"><small>${F.title} ${s.i + 1}/${F.list.length}</small><button class="x" onclick="go('${F.back}')">✕</button></div><div class="bar"><i style="width:${F.k / F.steps.length * 100}%"></i></div>`;
+  if (s.swap) return `${top}<div class="center"><div style="font-size:80px">🔄</div><h2>Change de côté</h2><p class="tip">Prépare ton côté droit : ${x[1]}</p><div class="timer" id="t">${F.t}</div>${ctl()}</div>`;
+  return `${top}<div class="center"><div style="font-size:80px">${x[0]}</div><h2>${x[1]}</h2>${s.side ? `<p class="combo">${s.side === 'G' ? '◀ Côté GAUCHE' : 'Côté DROIT ▶'}</p>` : ''}<p class="tip">${x[3]}</p>
+    <details class="more"><summary>Comment faire / aller plus loin</summary><p>${d.why}</p>${lst(d.how, 'ol')}<p><b style="color:var(--tx)">Aller plus loin :</b></p>${lst(d.up)}</details>
+    <div class="timer" id="t">${F.t}</div><p class="tip">${F.tip}</p>${ctl()}</div>`;
 }
-function nextStr() { F.i++; if (F.i >= STR.length) return endFlex(); draw(); }
+function ftick() { stop(); tm = setInterval(() => { F.t--; const el = $('#t'); if (el) el.textContent = F.t; if (F.t <= 0) { stop(); buzz(); nextStr(); } }, 1000); }
+function fpause() { F.p = !F.p; F.p ? stop() : ftick(); const b = $('#pb'); if (b) b.textContent = F.p ? '▶ Reprendre' : '⏸ Pause'; }
+function nextStr() { F.k++; if (F.k >= F.steps.length) return F.kind === 'flex' ? endFlex() : endGrip(); F.t = F.steps[F.k].sec; F.p = false; draw(); }
+function endGrip() {
+  const k = ds(new Date()), a = S.chk[k] || [];
+  S.grip = S.grip || {}; S.grip[k] = 1; S.gripN = (S.gripN || 0) + 1; if (!a.includes(5)) S.chk[k] = [...a, 5];   // coche « Poigne d'acier »
+  save(); check(); toast('🤜 Poigne validée'); go('home');
+}
+const gripCard = () => { const k = ds(new Date()), fait = !!(S.grip || {})[k];
+  return `<section class="card"><div class="row" style="margin:0"><h3 style="margin:0">🤜 Poigne d'acier</h3><b style="color:var(--ac)">${fait ? '✓ fait' : '4 min'}</b></div>
+    <p class="tip">${DEFIS[Math.floor(Date.now() / 864e5) % DEFIS.length]}</p>
+    <details class="more"><summary>Voir la routine (serviette, livre, élastique…)</summary>${GRIP.map(x => `<p><b style="color:var(--tx)">${x[0]} ${x[1]}</b> · ${x[4] ? '2×' : ''}${x[2]} s<br>${x[3]}</p>`).join('')}</details>
+    <button class="ghost" onclick="startGrip()">${fait ? 'Refaire' : 'Lancer'} la routine poigne</button></section>`; };
 function endFlex() {
   const k = ds(new Date()), a = S.chk[k] || [];
   S.flex[k] = 1; S.flexN++; if (!a.includes(3)) S.chk[k] = [...a, 3];   // coche « Étirements » dans la checklist
@@ -297,7 +313,7 @@ function rankHTML() {
     <div><b>${S.rec.pompes || 0}</b><small>pompes (record)</small></div><div><b>${S.seq}</b><small>séances</small></div></div></section>`;
 }
 const COMBOS = ['Jab – Direct','Jab – Direct – Crochet','Jab – Jab – Direct – Esquive','Direct – Crochet – Direct','Jab – Direct – Uppercut – Crochet','Jab – Crochet – Esquive – Direct'];
-const CHK = ['Échauffement 5 min','Boire 2 L d\'eau','Protéines à chaque repas','Étirements / mobilité','Dormir 7-8 h'];
+const CHK = ['Échauffement 5 min','Boire 2 L d\'eau','Protéines à chaque repas','Étirements / mobilité','Dormir 7-8 h','Poigne d\'acier'];
 function chkHTML() {
   const a = S.chk[ds(new Date())] || [];
   return `<section class="card" style="margin-top:16px"><div class="row" style="margin:0 0 6px"><h3 style="margin:0">✅ Ma journée de boxeur</h3><b style="color:var(--ac)">${a.length}/${CHK.length}</b></div>

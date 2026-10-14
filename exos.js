@@ -196,3 +196,29 @@ const STRX = [
  {why:"Relâche dos, hanches et épaules : parfait pour finir.",how:"Fesses sur les talons, bras loin devant.|Front au sol, respire dans le bas du dos.",up:"Marche les mains vers un côté puis l'autre|Écarte les genoux pour ouvrir les hanches"}
 ];
 const STIP = "Régularité : 5 à 10 min chaque jour valent mieux qu'une longue séance par semaine.|Étire-toi chaud, de préférence après la séance ou une douche chaude.|Tiens 30 à 60 s : le muscle met environ 20 s à se relâcher.|Expire en t'enfonçant doucement, ne bloque jamais ta respiration.|Tension de 5-6 sur 10 : jamais de douleur vive.|Contracté-relâché : pousse 5 s contre l'étirement, relâche, puis va un peu plus loin.|Ne rebondis pas : les à-coups crispent le muscle.";
+
+/* ===== Poigne d'acier : routine quotidienne (4 min, matériel de la maison) =====
+   [icône, nom, secondes, consigne, 2 = les deux côtés] */
+const GRIP = [
+  ["🧻","Serviette écrasée",30,"Serre une serviette roulée (ou une balle) de toutes tes forces 3 s, relâche, recommence.",2],
+  ["🎹","Doigts en éventail",30,"Élastique (ou chouchou) autour des doigts : ouvre-les en grand, referme, sans arrêt."],
+  ["📖","Pince du livre",30,"Tiens un gros livre par la tranche entre le pouce et les doigts, bras le long du corps.",2],
+  ["🪂","Suspension à la serviette",30,"Jette une serviette sur la barre, accroche-toi aux deux bouts. Tiens le plus longtemps possible."],
+  ["🔨","Le marteau",30,"Bouteille d'eau tenue par le goulot : fais-la basculer lentement de haut en bas, avant-bras posé.",2]
+];
+const GRX = [
+ {why:"Travaille l'écrasement : la force qui verrouille tes mains dans les bandes et les prises.",how:"Roule une serviette serrée, tiens-la à pleine main.|Serre fort 3 s, relâche 1 s.|Enchaîne sans te crisper les épaules.",up:"Serviette plus épaisse ou mouillée|Serre 5 s, relâche 1 s|Essore-la en la tordant|Balle de tennis plus dure"},
+ {why:"Les extenseurs des doigts sont toujours négligés : les muscler protège les coudes et équilibre la main.",how:"Rassemble le bout des doigts et du pouce, passe un élastique autour.|Ouvre grand les doigts contre la résistance.|Referme lentement.",up:"Élastique plus serré ou doublé|Pause de 2 s ouvert|Un doigt à la fois"},
+ {why:"La pince renforce pouce et bout des doigts, la poigne qui tient longtemps.",how:"Pince un livre épais par la tranche, pouce d'un côté, doigts de l'autre.|Bras le long du corps, épaules basses.|Tiens sans lâcher.",up:"Livre plus épais ou plus lourd|Pince avec deux doigts seulement|Marche en le tenant|Tiens une assiette en céramique de profil"},
+ {why:"La serviette est plus épaisse que la barre : elle fait travailler fort doigts, avant-bras et épaules.",how:"Pose une serviette sur la barre, saisis les deux bouts.|Suspends-toi, épaules actives.|Tiens jusqu'à la limite sans te lâcher d'un coup.",up:"Chaque jour, essaie de tenir 5 s de plus|Serviette plus épaisse|Une main sur la serviette, l'autre sur la barre|Ajoute une traction"},
+ {why:"Renforce l'avant-bras et le poignet, très sollicités par les frappes et les prises.",how:"Avant-bras posé sur une cuisse, la main dépasse.|Tiens la bouteille par le goulot.|Bascule le poignet de haut en bas, lentement.",up:"Bouteille plus lourde ou plus longue|Ralentis (3 s par mouvement)|Rotations de l'avant-bras"}
+];
+const DEFIS = [
+  "Défi du jour : porte tes sacs de courses sans les poser le plus longtemps possible.",
+  "Défi du jour : serre ta main fort à chaque fois que tu attends (bus, micro-ondes).",
+  "Défi du jour : tiens ta suspension à la serviette 5 s de plus qu'hier.",
+  "Défi du jour : ouvre tous les pots et bocaux de la maison sans rechigner.",
+  "Défi du jour : porte une bouteille d'eau pleine du bout des doigts en marchant.",
+  "Défi du jour : essore une serviette mouillée à fond, pour chaque main.",
+  "Défi du jour : monte tes escaliers en tenant la rampe du bout des doigts, sans t'appuyer."
+];
