@@ -222,3 +222,20 @@ const DEFIS = [
   "Défi du jour : essore une serviette mouillée à fond, pour chaque main.",
   "Défi du jour : monte tes escaliers en tenant la rampe du bout des doigts, sans t'appuyer."
 ];
+
+/* ===== Matériel nécessaire + remplacements (même objectif) =====
+   EQ : matériel requis par exercice. SUBS : remplaçants possibles, par ordre de préférence. */
+const EQL = {barre:"🧗 Barre de traction", chaise:"🪑 Chaise ou banc solide", table:"🪵 Table solide", elastique:"🎗️ Élastiques", ancrage:"🚪 Point d'ancrage (porte, poteau)"};
+const EQ = {
+  tract:["barre"], neg:["barre"], dips:["chaise"], rows:["table"], banc:["chaise"],
+  epress:["elastique"], erow:["elastique"], efac:["elastique","ancrage"], elat:["elastique"], ecurl:["elastique"],
+  etri:["elastique"], epull:["elastique"], esquat:["elastique"], ewalk:["elastique"], ehing:["elastique"],
+  epal:["elastique","ancrage"], eassist:["barre","elastique"], erot:["elastique","ancrage"]
+};
+const SUBS = {
+  tract:["rows","erow","epull","super","efac"], neg:["rows","erow","epull","super","efac"],
+  rows:["erow","efac","epull","super"], dips:["pompes","etri","epress","pexp"], banc:["fentes","squat","esquat"],
+  epress:["pompes","pexp","dips"], erow:["rows","tract","super"], efac:["super","rows","epull"], elat:["pompes","mont"],
+  ecurl:["tract","neg","rows"], etri:["dips","pompes"], epull:["super","rows"], esquat:["squat","fentes"],
+  ewalk:["fentes","squat"], ehing:["super","fentes"], epal:["gaine","mont","crunch"], eassist:["neg","rows","super"], erot:["super","efac"]
+};

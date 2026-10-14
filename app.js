@@ -115,7 +115,7 @@ function count(sec, end) {                      // compte à rebours
 function draw() {
   $('#nav').style.display = ['home','exos','hist','troph','tips','flex'].includes(view) ? 'flex' : 'none';
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === view));
-  $('#app').innerHTML = ({ home, exos, exo, hist, troph, work, rest, bonus, fin, tank, tips, flex, frun })[view]();
+  $('#app').innerHTML = ({ home, eq, exos, exo, hist, troph, work, rest, bonus, fin, tank, tips, flex, frun })[view]();
   if (view !== lastView) $('#app').scrollTop = 0; lastView = view;
   if (view === 'rest') count(W.r, () => go('work'));
   if (view === 'frun' && !F.p) ftick();
@@ -136,12 +136,37 @@ function home() {
     <button class="ghost" onclick="go('tank')">Choisir et lancer</button>
     <div class="row"><span>Le proposer après la séance</span><button class="sw ${T.on ? 'on' : ''}" onclick="S.tank.on=!S.tank.on;save();draw()"></button></div></section>${gripCard()}${chkHTML()}`;
 }
-function start() { W = { k:ORDER[S.seq % ORDER.length], i:0, s:0, v:null, miss:false, up:[], r:0 }; if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
-  go('work'); }
-const cur = () => DAYS[W.k].e[W.i];
+function start() { W = { k:ORDER[S.seq % ORDER.length], i:0, s:0, v:null, miss:false, up:[], r:0, D:DAYS[ORDER[S.seq % ORDER.length]] }; if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
+  go(needEq(W.D.e).length ? 'eq' : 'work'); }
+/* ===== Matériel : demande avant la séance, remplacements au besoin ===== */
+const hasEq = k => !S.eq || S.eq[k] !== false;
+const needEq = list => [...new Set(list.flatMap(e => EQ[e.id] || []))];
+const base = id => id === 'gaine2' ? 'gaine' : id;
+function adapt(list) {
+  const used = new Set(list.map(e => base(e.id))), out = [], subs = [];
+  list.forEach(e => {
+    if ((EQ[e.id] || []).every(hasEq)) return out.push(e);
+    const c = (SUBS[e.id] || []).find(id => !used.has(base(id)) && (EQ[id] || []).every(hasEq));
+    if (c) { used.add(base(c)); out.push(E[c]); }
+    subs.push([e, c ? E[c] : null]);
+  });
+  return { list:out, subs };
+}
+function eqTog(k) { S.eq = S.eq || {}; S.eq[k] = !hasEq(k); save(); draw(); }
+function eqGo() { const l = adapt(W.D.e0 || W.D.e).list; if (!l.length) return go('home'); W.D = { n:W.D.n, e:l }; go('work'); }
+function eq() {
+  W.D.e0 = W.D.e0 || W.D.e;
+  const need = needEq(W.D.e0), { list, subs } = adapt(W.D.e0);
+  return `<div class="topbar"><button class="x" onclick="go('home')">‹</button><small>${W.D.n}</small><span style="width:40px"></span></div>
+    <h2>Tu as le matériel ?</h2><p class="tip">Décoche ce que tu n'as pas sous la main : je remplace les exercices concernés par d'autres qui visent le même objectif. Ton choix est mémorisé.</p>
+    <section class="card"><ul>${need.map(k => `<li><b>${EQL[k]}</b><button class="sw ${hasEq(k) ? 'on' : ''}" onclick="eqTog('${k}')"></button></li>`).join('')}</ul></section>
+    ${subs.length ? `<section class="card tank"><h3 style="margin-top:0">🔄 Remplacements</h3><ul>${subs.map(([o, n]) => `<li><b>${o.n}</b><span>${n ? '→ ' + n.n : 'retiré'}</span></li>`).join('')}</ul></section>` : ''}
+    <button class="big" onclick="eqGo()">${list.length ? 'Commencer la séance' : 'Rien à faire !'}</button>`;
+}
+const cur = () => W.D.e[W.i];
 
 function work() {
-  const D = DAYS[W.k], e = cur(), g = tgt(e), timed = e.t === 't';
+  const D = W.D, e = cur(), g = tgt(e), timed = e.t === 't';
   if (W.v == null) W.v = g;
   const ctrl = timed && W.run
     ? `<button class="big stop" onclick="swStop()">■ Stop</button>`
@@ -173,7 +198,7 @@ function setDone() {
   if (++W.s >= e.s) {                                            // exercice terminé
     if (!W.miss) { S.tgt[e.id] = g + (e.t === 't' ? 5 : 1); W.up.push(`${e.n} → ${S.tgt[e.id]}${unit(e)}`); }
     W.miss = false; W.s = 0; W.i++;
-    if (W.i >= DAYS[W.k].e.length) return finish();
+    if (W.i >= W.D.e.length) return finish();
   }
   save(); W.r = e.rest; go('rest');
 }
@@ -200,7 +225,8 @@ const TANKS = {
   sprint: ['Sprint sur place', 'Genoux hauts, bras puissants.'],
   burpee: ['Burpees',          'Enchaîne sans pause.'],
   corde:  ['Corde à sauter',   'Rythme maximal.'],
-  boxe:   ['Shadow boxing',    'Coups rapides et secs.']
+  boxe:   ['Shadow boxing',    'Coups rapides et secs.'],
+  stairs: ['Escaliers (style Rocky)', 'Monte les marches deux par deux à fond, bras en l\'air en haut, redescends en marchant.']
 };
 const chip = (f, v, l) => `<button class="chip ${S.tank[f] === v ? 'on' : ''}" onclick='pick(${JSON.stringify(f)},${JSON.stringify(v)})'>${l}</button>`;
 function pick(f, v) { S.tank[f] = v; save(); draw(); }
