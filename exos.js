@@ -239,3 +239,36 @@ const SUBS = {
   ecurl:["tract","neg","rows"], etri:["dips","pompes"], epull:["super","rows"], esquat:["squat","fentes"],
   ewalk:["fentes","squat"], ehing:["super","fentes"], epal:["gaine","mont","crunch"], eassist:["neg","rows","super"], erot:["super","efac"]
 };
+
+/* ===== Échauffement (mobilité) ===== [icône, nom, secondes, consigne, 2 = deux côtés] */
+const MOB = [
+  ["🤷","Cercles de bras",30,"Bras tendus : 15 s de grands cercles vers l'avant, 15 s vers l'arrière."],
+  ["🌀","Rotations du buste",30,"Pieds ancrés, bras relâchés : tourne le buste à droite puis à gauche."],
+  ["🔄","Cercles de hanches",30,"Mains sur les hanches, grands cercles dans un sens puis dans l'autre."],
+  ["🦵","Squats lents",30,"Descente de 2 s, bras devant, remonte sans à-coup."],
+  ["🐱","Chat-vache",30,"À quatre pattes : dos rond, puis creux, au rythme du souffle."],
+  ["🏃","Montées de genoux",30,"Genoux hauts, bras qui accompagnent, rythme doux."],
+  ["🥊","Shadow boxing léger",30,"Jab-direct au ralenti, déplace-toi sur la pointe des pieds."]
+];
+const MOBX = [
+ {why:"Réveille les épaules, très sollicitées en boxe et en tractions.",how:"Debout, bras tendus sur les côtés.|Fais de grands cercles lents.|Change de sens à mi-temps.",up:"Cercles plus grands|Ajoute un élastique léger entre les mains"},
+ {why:"Libère la colonne et prépare les rotations des coups.",how:"Pieds largeur d'épaules, genoux souples.|Tourne le buste, les bras suivent sans force.|Garde le bassin face à toi.",up:"Tourne plus loin à chaque passage|Pivote sur la pointe du pied arrière"},
+ {why:"Huile les hanches avant squats, fentes et déplacements.",how:"Mains sur les hanches, jambes un peu fléchies.|Dessine de grands cercles avec le bassin.|Change de sens à mi-temps.",up:"Cercles plus larges|Fais-les sur une jambe"},
+ {why:"Active cuisses et fessiers et vérifie ta mobilité de hanches.",how:"Pieds largeur d'épaules, bras devant.|Descends lentement, genoux dans l'axe des pieds.|Remonte en poussant dans les talons.",up:"Pause de 2 s en bas|Descends plus bas si le dos reste droit"},
+ {why:"Mobilise la colonne vertébrale en douceur.",how:"À quatre pattes, mains sous les épaules.|Expire : dos rond. Inspire : dos creux.",up:"Ralentis : 4 s par mouvement|Ajoute des cercles du bassin"},
+ {why:"Monte la température et réveille le cardio sans fatigue.",how:"Debout, monte un genou puis l'autre.|Bras qui accompagnent, dos droit.|Reste léger sur la pointe des pieds.",up:"Genoux plus hauts|Rythme plus rapide sur les 10 dernières secondes"},
+ {why:"Prépare le geste et la coordination : épaules, hanches, jambes ensemble.",how:"Garde haute, menton bas.|Jab-direct au ralenti, pivote le pied arrière.|Reste mobile sur les appuis.",up:"Ajoute un crochet et une esquive|Accélère progressivement"}
+];
+STRX.push(
+ {why:"Les triceps travaillent à chaque pompe, dip et direct : ils se raccourcissent vite.",how:"Main dans le dos, entre les omoplates, coude vers le plafond.|L'autre main appuie doucement sur le coude.|Garde la nuque longue.",up:"Pousse le coude 5 s contre la main, puis relâche|Descends un peu plus la main dans le dos"},
+ {why:"Des mollets souples protègent tendon d'Achille et genoux (très utile pour la corde à sauter).",how:"Mains au mur, une jambe tendue derrière, talon au sol.|Avance le bassin vers le mur.|Garde le pied bien droit.",up:"Plie légèrement le genou arrière pour viser le bas du mollet|Recule le pied pour intensifier"},
+ {why:"Détend les hanches et soulage le bas du dos.",how:"Allongé sur le dos, cheville sur le genou opposé.|Tire la cuisse du bas vers toi.|Garde la tête au sol.",up:"Pousse le genou vers l'extérieur avec le coude|Rapproche la cuisse de la poitrine"},
+ {why:"Relâche les tensions accumulées par la garde haute et les tractions.",how:"Assis ou debout, épaules basses.|Penche l'oreille vers l'épaule.|Main sur la tête, poids très léger seulement.",up:"Regarde un peu vers le sol pour viser l'arrière de la nuque|Tire l'épaule opposée vers le bas"}
+);
+
+/* ===== Respiration guidée : [phase, secondes, taille du cercle] ===== */
+const BR = {
+  coh:{ic:"🌬️",n:"Cohérence cardiaque",min:5,d:"Inspire 5 s, expire 5 s. Calme le cœur : idéal le soir.",ph:[["Inspire",5,1],["Expire",5,.55]]},
+  box:{ic:"🟦",n:"Respiration carrée",min:3,d:"4-4-4-4 : garde ton sang-froid sous pression, comme avant un combat.",ph:[["Inspire",4,1],["Retiens",4,1],["Expire",4,.55],["Retiens",4,.55]]},
+  rec:{ic:"🌙",n:"Récupération 4-7-8",min:3,d:"Une longue expiration fait retomber la tension et aide à s'endormir.",ph:[["Inspire",4,1],["Retiens",7,1],["Expire",8,.55]]}
+};

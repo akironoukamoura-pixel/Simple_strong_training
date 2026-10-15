@@ -95,3 +95,15 @@ nav button{font-size:11px;padding:8px 0}
 .xd p{margin:0 0 4px}.xd .xh{color:var(--tx);font-weight:700;margin-top:10px}
 .more{text-align:left;color:var(--mu);font-size:15px;margin:6px 0}
 .more summary{cursor:pointer;color:var(--ac);font-weight:700;text-align:center}
+/* ===== Accueil, respiration ===== */
+nav button{font-size:12px}
+.hero{background:var(--grad);border-radius:28px;padding:22px 20px 18px;margin-bottom:14px;box-shadow:0 12px 36px #ff4d1f40;color:#fff}
+.hero small{color:#ffe3d6;font-size:14px}.hero h2{font-size:44px;line-height:1.05;margin:6px 0 4px}.hero p{margin:0;color:#fff;opacity:.9}
+.figs{display:flex;justify-content:space-between;margin:14px 0 4px}
+.hero svg{width:19%;height:40px;fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.hero svg circle{fill:#fff}.hero svg .o{stroke-opacity:.45}.hero svg .g{stroke-opacity:.3;stroke-width:2}
+.big.w{background:#fff;color:#1a0a05;box-shadow:none;margin-top:16px}
+.hero .more{color:#ffe3d6;text-align:center}.hero .more summary{color:#fff}.hero .more p{margin:4px 0}
+.orb{width:200px;height:200px;border-radius:50%;margin:10px auto 18px;background:radial-gradient(circle at 35% 30%,var(--ac),var(--ac2));box-shadow:0 0 70px #ff4d1f66;transform:scale(.55)}
+details.card summary{cursor:pointer;color:var(--ac);font-weight:700}
+.more.card{text-align:left}
