@@ -126,18 +126,26 @@ document.querySelectorAll('#nav button').forEach(b => b.onclick = () => go(b.dat
 
 /* ================= ÉCRANS ================= */
 const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Bonjour champion' : h < 18 ? 'Salut champion' : 'Bonsoir champion'; };
+/* ===== Choix de la séance du jour (discret) =====
+   rot() = séance prévue dans la rotation ; S.pick = séance choisie aujourd'hui.
+   Si tu fais une autre séance que la prévue, la rotation ne bouge pas : la prévue reste due. */
+const rot = () => (S.rot == null ? S.seq : S.rot) % ORDER.length;
+const todayK = () => (S.pick && S.pick.d === ds(new Date())) ? S.pick.k : ORDER[rot()];
+function pickDay(k) { S.pick = k === ORDER[rot()] ? null : { d:ds(new Date()), k }; save(); draw(); }
+const swapHTML = k => `<details class="more"><summary style="opacity:.55;font-size:13px">⇄ Changer de séance</summary>
+  <div class="chips" style="margin-top:8px">${ORDER.map(o => `<button class="chip ${o === k ? 'on' : ''}" onclick="pickDay('${o}')">${DAYS[o].n}${o === ORDER[rot()] ? ' · prévue' : ''}</button>`).join('')}</div></details>`;
 function home() {
-  const k = ORDER[S.seq % ORDER.length], D = DAYS[k], fait = !!S.done[ds(new Date())];
+  const k = todayK(), D = DAYS[k], fait = !!S.done[ds(new Date())];
   const min = Math.round(D.e.reduce((s, e) => s + e.s * ((e.t === 't' ? tgt(e) : 40) + e.rest), 0) / 60), n = (S.chk[ds(new Date())] || []).length;
   return `<header><div><small>${greet()}</small><h1>Muscu</h1></div><div class="st">🔥 <b>${streak()}</b><small>jours</small></div></header>
     <section class="hero"><small>${fait ? '✓ Séance du jour faite · prochaine séance' : 'Séance du jour'}</small><h2>${D.n}</h2>
     <p>${D.e.length} exercices · environ ${min} min</p><div class="figs">${D.e.slice(0, 5).map(e => svg(e.p)).join('')}</div>
     <button class="big w" onclick="start()">${fait ? 'Refaire une séance' : 'Commencer'}</button>
-    <details class="more"><summary>Voir les exercices</summary>${D.e.map(e => `<p>${e.n} · ${e.s} × ${tgt(e)}${unit(e)}</p>`).join('')}</details></section>
+    <details class="more"><summary>Voir les exercices</summary>${D.e.map(e => `<p>${e.n} · ${e.s} × ${tgt(e)}${unit(e)}</p>`).join('')}</details>${swapHTML(k)}</section>
     <button class="ghost" onclick="MT='day';go('moi')">✅ Ma journée · ${n}/${CHK.length}</button>
     <p class="quote" style="margin-top:22px">${quote()}</p>`;
 }
-function start() { W = { k:ORDER[S.seq % ORDER.length], i:0, s:0, v:null, miss:false, up:[], r:0, D:DAYS[ORDER[S.seq % ORDER.length]] }; if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
+function start() { W = { k:todayK(), i:0, s:0, v:null, miss:false, up:[], r:0, D:DAYS[todayK()] }; if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
   go(needEq(W.D.e).length ? 'eq' : 'work'); }
 /* ===== Matériel : demande avant la séance, remplacements au besoin ===== */
 const hasEq = k => !S.eq || S.eq[k] !== false;
@@ -208,7 +216,11 @@ function rest() {
     <p>Ensuite : ${cur().n}</p><button class="big" onclick="go('work')">Passer</button></div>`;
 }
 function finish() {
+  const was = W.k === ORDER[rot()];                      // séance prévue ou choisie ?
   S.done[ds(new Date())] = W.k; S.seq++;
+  if (S.rot == null) S.rot = S.seq - 1;
+  if (was) S.rot++;                                       // la rotation n'avance que si c'était la prévue
+  S.pick = null;
   S.maxStreak = Math.max(S.maxStreak, streak()); save(); check(); go('fin');
 }
 function fin() {
